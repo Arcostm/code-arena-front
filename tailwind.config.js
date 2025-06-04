@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
@@ -7,8 +7,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        grotesk: ['"Space Grotesk"', 'sans-serif'],
-        montserrat: ['Montserrat', 'sans-serif'],
+        space: ['"Space Grotesk"', 'sans-serif'],
       },
     },
   },

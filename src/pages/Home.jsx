@@ -1,53 +1,33 @@
-import React from "react";
+import ilustracion from '../assets/columna-c.png';
 
-export const LandingPage = () => {
+const Home = () => {
   return (
-    <div className="bg-[#f7f2e5] flex justify-center w-full font-montserrat">
-      <div className="bg-[#f7f2e5] w-full max-w-[1280px] min-h-[832px] relative">
-        <header className="flex items-center justify-between px-10 py-6">
-          <div className="flex items-center">
-            <img
-              className="w-[170px] h-[61px] object-cover"
-              alt="Codearena"
-              src="https://c.animaapp.com/mb88q58bfdPEcA/img/codearena-2.png"
-            />
-          </div>
+    <div className="relative w-full h-screen bg-[#F7F2E5]">
 
-          <div className="flex items-center gap-8">
-            <button className="bg-black text-[#f7f2e5] rounded-xl h-12 px-7 font-grotesk text-xl">
-              Empezar
-            </button>
+      {/* Contenido principal */}
+      <div className="relative z-10 flex flex-col items-center text-center pt-20 gap-8 pb-48">
+        <h1 className="text-[64px] md:text-[96px] font-bold text-black font-space">
+          CODE ARENA
+        </h1>
 
-            <nav className="flex items-center gap-8 font-grotesk text-xl text-black">
-              <a href="#">Torneos</a>
-              <a href="#">Cómo funciona</a>
-            </nav>
-          </div>
-        </header>
-
-        <main className="flex flex-col items-center mt-16 text-center">
-          <h1 className="font-grotesk text-black text-9xl">CODE ARENA</h1>
-
-          <div className="mt-16 flex flex-col items-center text-[32px] font-grotesk font-bold text-black leading-normal">
-            <p>Sube tu código.</p>
-            <p>Escala en el ranking.</p>
-            <p>Deja huella en cada línea.</p>
-          </div>
-
-          <div className="relative mt-4">
-            <img
-              className="w-[284px] h-[270px] object-cover"
-              alt="Logo sobre columna"
-              src="https://c.animaapp.com/mb88q58bfdPEcA/img/logo-removebg-preview-1.png"
-            />
-            <img
-              className="w-[455px] h-[261px] object-cover mt-4"
-              alt="Columna decorativa"
-              src="https://c.animaapp.com/mb88q58bfdPEcA/img/chatgpt-image-3-abr-2025--12-59-19-1.png"
-            />
-          </div>
-        </main>
+        <div className="text-black text-[20px] md:text-[28px] font-medium leading-relaxed font-space">
+          <p>Sube tu código.</p>
+          <p>Escala en el ranking.</p>
+          <p>Deja huella en cada línea.</p>
+        </div>
       </div>
+
+      {/* Imagen de fondo ABSOLUTA pegada abajo */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-0">
+        <img
+          src={ilustracion}
+          alt="3D Illustration"
+          className="w-[300px] md:w-[400px] lg:w-[455px] object-contain"
+        />
+      </div>
+
     </div>
   );
 };
+
+export default Home;
