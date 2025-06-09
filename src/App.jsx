@@ -4,8 +4,10 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Torneos from './pages/Torneos';
 import Signup from './pages/Signup';
-
-// Puedes importar más páginas en el futuro
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard'; 
+import TorneoDetalle from './pages/TorneoDetalle';
+import Perfil from "./pages/Perfil";
 
 function App() {
   return (
@@ -17,7 +19,10 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/torneos" element={<Torneos />} />
           <Route path="/signup" element={<Signup />} />
-          {/* Aquí irán más rutas */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/torneos/:slug" element={<TorneoDetalle />} />
+          <Route path="/perfil" element={<Perfil />} />
         </Routes>
       </div>
     </Router>
