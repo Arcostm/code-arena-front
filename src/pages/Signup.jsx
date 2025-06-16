@@ -1,15 +1,13 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
 import logo from '../assets/casco.png';
 
 const Signup = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
     termsAccepted: false,
   });
 
@@ -21,12 +19,39 @@ const Signup = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.termsAccepted) return alert('Debes aceptar los términos.');
-    if (form.password !== form.confirmPassword) return alert('Las contraseñas no coinciden.');
-    console.log('Formulario enviado:', form);
-    navigate('/dashboard');
+
+    if (!form.termsAccepted) {
+      toast.error('Debes aceptar los términos.');
+      return;
+    }
+
+    if (!form.username.trim()) {
+      toast.error('El nombre de usuario no puede estar vacío.');
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:8000/users/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: form.username }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success(data.message || "Usuario creado");
+        navigate("/login");
+      } else {
+        toast.error(data.detail || "Error al registrar");
+      }
+      
+    } catch (err) {
+      console.error("Error:", err);
+      toast.error("Error al conectar con el servidor.");
+    }
   };
 
   return (
@@ -53,6 +78,7 @@ const Signup = () => {
       >
         ÚNETE A LA BATALLA
       </motion.h1>
+
       <motion.form
         onSubmit={handleSubmit}
         className="flex flex-col gap-4 w-full max-w-md"
@@ -60,32 +86,20 @@ const Signup = () => {
         animate="visible"
         variants={{
           hidden: {},
-          visible: {
-            transition: { staggerChildren: 0.1 }
-          }
+          visible: { transition: { staggerChildren: 0.1 } },
         }}
       >
-        {['username', 'email', 'password', 'confirmPassword'].map((field, idx) => (
-          <motion.input
-            key={field}
-            type={field.includes('password') ? 'password' : field === 'email' ? 'email' : 'text'}
-            name={field}
-            placeholder={
-              field === 'username'
-                ? 'Nombre de usuario'
-                : field === 'email'
-                ? 'Email'
-                : field === 'password'
-                ? 'Contraseña'
-                : 'Confirmar contraseña'
-            }
-            className="px-4 py-2 rounded border shadow-md focus:outline-none focus:ring-2 focus:ring-black"
-            value={form[field]}
-            onChange={handleChange}
-            required
-            variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-          />
-        ))}
+        <motion.input
+          type="text"
+          name="username"
+          placeholder="Nombre de usuario"
+          className="px-4 py-2 rounded border shadow-md focus:outline-none focus:ring-2 focus:ring-black"
+          value={form.username}
+          onChange={handleChange}
+          required
+          variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+        />
+
         <motion.label
           className="text-sm flex items-center gap-2"
           initial={{ opacity: 0 }}
@@ -101,6 +115,7 @@ const Signup = () => {
           />
           <strong>He leído y acepto los Términos y Condiciones.</strong>
         </motion.label>
+
         <motion.button
           type="submit"
           className="bg-black text-white py-2 rounded-xl text-lg hover:bg-gray-800 transition-colors shadow-md"
@@ -110,13 +125,14 @@ const Signup = () => {
         >
           CREAR CUENTA
         </motion.button>
+
         <motion.p
           className="mt-6 text-sm text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
         >
-          ¿Ya tienes cuenta?{' '}
+          ¿Ya tienes cuenta?{" "}
           <Link to="/login" className="underline">
             Inicia sesión
           </Link>
