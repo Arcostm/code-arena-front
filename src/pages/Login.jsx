@@ -1,29 +1,30 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import logo from '../assets/icono.png';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!username || !password) {
-      setError('Por favor, completa todos los campos.');
+      toast.error('Por favor, completa todos los campos.');
       return;
     }
 
-    setError('');
-    login(username);
-    navigate('/dashboard');
+    try {
+      await login(username.trim(), password.trim());
+      navigate('/dashboard');
+    } catch (err) {
+      toast.error(err.message || 'Error al iniciar sesión');
+    }
   };
 
   return (
@@ -58,11 +59,7 @@ const Login = () => {
           animate="visible"
           variants={{
             hidden: {},
-            visible: {
-              transition: {
-                staggerChildren: 0.1,
-              },
-            },
+            visible: { transition: { staggerChildren: 0.1 } },
           }}
         >
           <motion.input
@@ -81,16 +78,7 @@ const Login = () => {
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
             variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
           />
-          {error && (
-            <motion.div
-              className="text-red-600 text-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-            >
-              {error}
-            </motion.div>
-          )}
+
           <motion.button
             type="submit"
             className="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition-colors"

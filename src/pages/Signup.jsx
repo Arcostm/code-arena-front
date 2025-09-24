@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import logo from '../assets/casco.png';
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [form, setForm] = useState({
     username: '',
+    password: '',
     termsAccepted: false,
   });
 
@@ -26,31 +29,16 @@ const Signup = () => {
       toast.error('Debes aceptar los términos.');
       return;
     }
-
-    if (!form.username.trim()) {
-      toast.error('El nombre de usuario no puede estar vacío.');
+    if (!form.username.trim() || !form.password.trim()) {
+      toast.error('Usuario y contraseña son obligatorios.');
       return;
     }
 
     try {
-      const res = await fetch("http://localhost:8000/users/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: form.username }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        toast.success(data.message || "Usuario creado");
-        navigate("/login");
-      } else {
-        toast.error(data.detail || "Error al registrar");
-      }
-      
+      await register(form.username.trim(), form.password.trim());
+      navigate('/login');
     } catch (err) {
-      console.error("Error:", err);
-      toast.error("Error al conectar con el servidor.");
+      toast.error(err.message || 'Error al registrar');
     }
   };
 
@@ -89,6 +77,7 @@ const Signup = () => {
           visible: { transition: { staggerChildren: 0.1 } },
         }}
       >
+        {/* Username */}
         <motion.input
           type="text"
           name="username"
@@ -100,6 +89,19 @@ const Signup = () => {
           variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
         />
 
+        {/* Password */}
+        <motion.input
+          type="password"
+          name="password"
+          placeholder="Contraseña"
+          className="px-4 py-2 rounded border shadow-md focus:outline-none focus:ring-2 focus:ring-black"
+          value={form.password}
+          onChange={handleChange}
+          required
+          variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+        />
+
+        {/* Terms */}
         <motion.label
           className="text-sm flex items-center gap-2"
           initial={{ opacity: 0 }}
@@ -116,6 +118,7 @@ const Signup = () => {
           <strong>He leído y acepto los Términos y Condiciones.</strong>
         </motion.label>
 
+        {/* Submit */}
         <motion.button
           type="submit"
           className="bg-black text-white py-2 rounded-xl text-lg hover:bg-gray-800 transition-colors shadow-md"
@@ -132,7 +135,7 @@ const Signup = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
         >
-          ¿Ya tienes cuenta?{" "}
+          ¿Ya tienes cuenta?{' '}
           <Link to="/login" className="underline">
             Inicia sesión
           </Link>
