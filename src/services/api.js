@@ -42,24 +42,6 @@ export async function getRanking(tournamentId) {
   return res.json();
 }
 
-export async function submitCode(username, tournamentId, code) {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/submit_code`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      username,
-      tournament_id: tournamentId,
-      code,
-    }),
-  });
-
-  if (!res.ok) {
-    throw new Error("Error al enviar el código");
-  }
-
-  return res.json();
-}
-
 export async function getUserSubmissions(username) {
   const res = await fetch(`${import.meta.env.VITE_API_URL}/submissions/${username}`);
   if (!res.ok) throw new Error("Error al obtener historial");
@@ -84,8 +66,12 @@ export const api = {
   ranking: (tournamentName) => request(`/ranking/${encodeURIComponent(tournamentName)}`),
 
   // SUBMISSIONS
-  submitCode: ({ username, tournament_id, code }, token) =>
-    request('/submit_code', { method: 'POST', body: { username, tournament_id, code }, token }),
+  submitCode: ({ tournament_id, code }, token) =>
+    request('/submit_code', {
+      method: 'POST',
+      body: { tournament_id, code },
+      token,
+    }),
 
   // HISTORIAL
   userHistory: (username, token) =>

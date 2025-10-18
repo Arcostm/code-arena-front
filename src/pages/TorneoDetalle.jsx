@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { getRanking, submitCode } from "../services/api";
+import { getRanking, api } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 
@@ -19,10 +19,8 @@ const TorneoDetalle = () => {
       .then((data) => {
         if (data.error) {
           setError(data.error);
-        } else if (data.message) {
-          setError(data.message);
         } else {
-          setRanking(data.ranking);
+          setRanking(data.ranking || []);
         }
         setLoading(false);
       })
@@ -44,11 +42,12 @@ const TorneoDetalle = () => {
 
     setSubmitting(true);
     try {
-      const result = await submitCode(user.username, slug, code);
+      await api.submitCode({ tournament_id: slug, code }, user.token);
       toast.success("Código enviado con éxito ✅");
 
-      // refrescar ranking
-      setRanking(result.ranking || ranking);
+      // refrescar ranking después del submit
+      const updated = await getRanking(slug);
+      setRanking(updated.ranking);
     } catch (err) {
       console.error(err);
       toast.error("Error al enviar el código");
@@ -100,14 +99,22 @@ const TorneoDetalle = () => {
             </tr>
           </thead>
           <tbody>
-            {ranking.map((fila) => (
-              <tr key={fila.username} className="border-t border-gray-300">
-                <td className="py-2">{fila.position}</td>
-                <td>{fila.username}</td>
-                <td>{fila.score}</td>
-                <td>{fila.execution_time}s</td>
+            {ranking.length === 0 ? (
+              <tr>
+                <td colSpan="4" className="text-center py-4 text-gray-600">
+                  Todavía no hay envíos en este torneo.
+                </td>
               </tr>
-            ))}
+            ) : (
+              ranking.map((fila) => (
+                <tr key={fila.username} className="border-t border-gray-300">
+                  <td className="py-2">{fila.position}</td>
+                  <td>{fila.username}</td>
+                  <td>{fila.score}</td>
+                  <td>{fila.execution_time}s</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

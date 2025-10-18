@@ -3,21 +3,9 @@ import { motion } from "framer-motion";
 import ilustracion from '../assets/columna-c.png';
 
 const Home = () => {
-  const [mensaje, setMensaje] = useState("");
 
-  useEffect(() => {
-    fetch("http://localhost:8000/test")
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Respuesta del backend:", data);
-        setMensaje(data.message || "Sin mensaje del backend");
-      })
-      .catch((error) => {
-        console.error("Error al conectar con el backend:", error);
-        setMensaje("No se pudo conectar con el backend 😢");
-      });
-  }, []);
-  
+
+
 
   return (
     <div className="relative w-full h-screen bg-[#F7F2E5] overflow-hidden">
@@ -38,15 +26,6 @@ const Home = () => {
           <p>Deja huella en cada línea.</p>
         </div>
 
-        {/* Animación del mensaje del backend */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 0.5 }}
-          className="mt-4 text-sm md:text-base text-gray-600 font-mono"
-        >
-          🔁 {mensaje}
-        </motion.p>
       </motion.div>
 
       {/* Imagen de fondo perfectamente centrada */}
