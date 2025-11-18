@@ -1,9 +1,11 @@
-import { Link, useNavigate } from 'react-router-dom';
-import logo from '../../assets/logo.png';
-import avatar from '../../assets/avatar.png';
-import { useAuth } from '../../context/AuthContext';
-import { useState, useEffect, useRef } from 'react';
-import { toast } from 'react-toastify'; // 👈 Importación añadida
+// 📄 src/components/ui/Navbar.jsx
+
+import { Link, useNavigate } from "react-router-dom";
+import logo from "../../assets/logo.png";
+import avatar from "../../assets/avatar.png";
+import { useAuth } from "../../context/AuthContext";
+import { useState, useEffect, useRef } from "react";
+import { toast } from "react-toastify";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -13,8 +15,8 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-    toast.success('Sesión cerrada correctamente 🛡️'); // 👈 Notificación
-    navigate('/');
+    toast.success("Sesión cerrada correctamente 🛡️");
+    navigate("/");
   };
 
   useEffect(() => {
@@ -23,14 +25,15 @@ const Navbar = () => {
         setShowMenu(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
     <nav className="w-full bg-[#F7F2E5] py-6 font-space relative">
       <div className="w-full px-10 flex items-center justify-between">
-        {/* Logo totalmente a la izquierda */}
+        
+        {/* Logo */}
         <div className="flex-shrink-0">
           <Link to="/">
             <img
@@ -41,7 +44,7 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Menú centrado absoluto */}
+        {/* Menú centrado */}
         <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex gap-8">
           <Link to="/torneos" className="text-black text-lg hover:text-gray-600 transition-colors">
             Torneos
@@ -62,15 +65,16 @@ const Navbar = () => {
                 onClick={() => setShowMenu((prev) => !prev)}
               />
               <div
-                className={`absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-md z-50 transition-all duration-200 ease-in-out transform ${showMenu
-                  ? 'opacity-100 translate-y-0 pointer-events-auto'
-                  : 'opacity-0 -translate-y-2 pointer-events-none'
+                className={`absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-md z-50 transition-all duration-200 ease-in-out transform ${
+                  showMenu
+                    ? "opacity-100 translate-y-0 pointer-events-auto"
+                    : "opacity-0 -translate-y-2 pointer-events-none"
                 }`}
               >
                 <button
                   className="w-full text-left px-4 py-2 hover:bg-gray-100"
                   onClick={() => {
-                    navigate('/perfil');
+                    navigate("/perfil");
                     setShowMenu(false);
                   }}
                 >

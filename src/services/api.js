@@ -76,4 +76,25 @@ export const api = {
   // HISTORIAL
   userHistory: (username, token) =>
     request(`/users/${encodeURIComponent(username)}/history`, { token }),
+
+  uploadValidator: (tournamentName, file, token) => {
+    const form = new FormData();
+    form.append('file', file);
+    return fetch(`${BASE_URL}/tournaments/${encodeURIComponent(tournamentName)}/validator`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` }, // sin content-type, lo pone el browser
+      body: form
+    }).then(async (res) => {
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Error subiendo validador');
+      return data;
+    });
+  },
+
+  // submit asíncrono
+  submitCodeAsync: ({ tournament_id, code }, token) =>
+    request('/submit_code_async', { method: 'POST', body: { tournament_id, code }, token }),
+
+  // progreso
+  progress: (submissionId) => request(`/progress/${submissionId}`),
 };
