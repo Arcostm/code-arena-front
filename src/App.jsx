@@ -1,7 +1,7 @@
+// src/App.jsx 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import Navbar from "./components/ui/Navbar.jsx";   // ✅ FALTABA ESTE IMPORT
-
+import Navbar from "./components/ui/Navbar.jsx";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Torneos from "./pages/Torneos";
@@ -25,15 +25,30 @@ function App() {
         <Navbar />
 
         <Routes>
-          {/* Rutas públicas */}
+
+          {/* ============================
+              RUTAS PÚBLICAS
+              ============================ */}
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/torneos" element={<Torneos />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/torneos/:slug" element={<TorneoDetalle />} />
 
-          {/* Rutas privadas */}
+          {/* ============================
+              RUTAS PRIVADAS
+              ============================ */}
+
+          {/* Detalle de torneo (ranking + envíos) */}
+          <Route
+            path="/torneos/:slug"
+            element={
+              <PrivateRoute>
+                <TorneoDetalle />
+              </PrivateRoute>
+            }
+          />
+
           <Route
             path="/dashboard"
             element={
@@ -52,7 +67,6 @@ function App() {
             }
           />
 
-          {/* Ruta privada para subir validadores */}
           <Route
             path="/admin/validator"
             element={
@@ -61,6 +75,7 @@ function App() {
               </PrivateRoute>
             }
           />
+
         </Routes>
 
         <ToastContainer position="top-right" autoClose={2500} />
