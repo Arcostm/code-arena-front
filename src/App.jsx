@@ -11,12 +11,13 @@ import Dashboard from "./pages/Dashboard";
 import TorneoDetalle from "./pages/TorneoDetalle";
 import Perfil from "./pages/Perfil";
 import AdminValidator from "./pages/AdminValidator";
+import TeacherRoute from "./components/ui/TeacherRoute.jsx";
 
 import PrivateRoute from "./components/ui/PrivateRoute.jsx";
+import PublicOnlyRoute from "./components/ui/PublicOnlyRoute.jsx";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
 
 function App() {
   return (
@@ -31,15 +32,43 @@ function App() {
               ============================ */}
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
-          <Route path="/torneos" element={<Torneos />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
 
           {/* ============================
-              RUTAS PRIVADAS
+              RUTAS SOLO PARA NO LOGGEADOS
+              ============================ */}
+          <Route
+            path="/signup"
+            element={
+              <PublicOnlyRoute>
+                <Signup />
+              </PublicOnlyRoute>
+            }
+          />
+
+          <Route
+            path="/login"
+            element={
+              <PublicOnlyRoute>
+                <Login />
+              </PublicOnlyRoute>
+            }
+          />
+
+          {/* ============================
+              RUTAS PRIVADAS (ALUMNOS + PROFES)
               ============================ */}
 
-          {/* Detalle de torneo (ranking + envíos) */}
+          {/* Lista de torneos */}
+          <Route
+            path="/torneos"
+            element={
+              <PrivateRoute>
+                <Torneos />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Detalle de torneo */}
           <Route
             path="/torneos/:slug"
             element={
@@ -49,6 +78,7 @@ function App() {
             }
           />
 
+          {/* Dashboard */}
           <Route
             path="/dashboard"
             element={
@@ -58,6 +88,7 @@ function App() {
             }
           />
 
+          {/* Perfil */}
           <Route
             path="/perfil"
             element={
@@ -67,12 +98,15 @@ function App() {
             }
           />
 
+          {/* ============================
+              RUTA SOLO PROFESOR
+              ============================ */}
           <Route
             path="/admin/validator"
             element={
-              <PrivateRoute>
+              <TeacherRoute>
                 <AdminValidator />
-              </PrivateRoute>
+              </TeacherRoute>
             }
           />
 

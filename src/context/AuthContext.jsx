@@ -1,3 +1,4 @@
+// src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { toast } from 'react-toastify';
@@ -6,9 +7,9 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    // Al iniciar, cargamos usuario+token desde localStorage
+    // Al iniciar, cargamos usuario+token (+role) desde localStorage
     const raw = localStorage.getItem('auth');
-    return raw ? JSON.parse(raw) : null; // { username, token }
+    return raw ? JSON.parse(raw) : null; // { username, token, role }
   });
 
   // Guardar en state + localStorage
@@ -26,8 +27,12 @@ export function AuthProvider({ children }) {
 
   // Login real (pide token al backend)
   async function login(username, password) {
-    const { access_token } = await api.login(username, password);
-    saveAuth({ username, token: access_token });
+    // ⬅️ CAMBIO 1: ahora esperamos también el role del backend
+    const { access_token, role } = await api.login(username, password);
+
+    // ⬅️ CAMBIO 2: guardamos role además de username y token
+    saveAuth({ username, token: access_token, role });
+
     toast.success('Sesión iniciada ✅');
     return true;
   }
@@ -39,8 +44,9 @@ export function AuthProvider({ children }) {
   }
 
   const value = {
-    user,              // { username, token }
+    user,                         // { username, token, role }
     token: user?.token || null,
+    role: user?.role || null,     // ⬅️ CAMBIO 3: exponemos el role por comodidad
     login,
     logout,
     register,

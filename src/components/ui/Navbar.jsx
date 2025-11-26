@@ -80,6 +80,20 @@ const Navbar = () => {
                 >
                   Ver perfil
                 </button>
+
+                {/* ⭐ SOLO PROFESORES ⭐ */}
+                {user.role === "teacher" && (
+                  <button
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                    onClick={() => {
+                      navigate("/admin/validator");
+                      setShowMenu(false);
+                    }}
+                  >
+                    Panel profesor
+                  </button>
+                )}
+
                 <button
                   className="w-full text-left px-4 py-2 hover:bg-gray-100"
                   onClick={handleLogout}
