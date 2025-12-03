@@ -1,6 +1,5 @@
-// 📄 src/pages/TorneoDetalle.jsx
-
-import { useParams } from "react-router-dom";
+// src/pages/TorneoDetalle.jsx
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { getRanking, api } from "../services/api";
@@ -8,11 +7,16 @@ import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import ProgressBar from "../components/ProgressBar.jsx";
 
+
+
 const POLL_MS = 1500;
 
 const TorneoDetalle = () => {
-  const { slug } = useParams(); // nombre del torneo (string)
+  const { slug } = useParams(); 
   const { user } = useAuth();
+  const navigate = useNavigate(); 
+
+
 
   // estado del torneo real con ID
   const [tournament, setTournament] = useState(null);
@@ -114,9 +118,17 @@ const TorneoDetalle = () => {
     setSubmitting(true);
 
     try {
+      console.log("📤 Enviando al backend:", {
+        tournament_id: tournament?.id,
+        code: code,
+        codeType: typeof code,
+        codeLength: code?.length
+      });
+      
+      
       const resp = await api.submitCodeAsync(
         {
-          tournament_id: tournament.id, // 👈 AHORA CORRECTO
+          tournament_id: tournament.id,
           code,
         },
         user.token
@@ -130,14 +142,14 @@ const TorneoDetalle = () => {
       toast.info("Código enviado. Procesando en JupyterHub…");
     } catch (err) {
       console.error("❌ ERROR EN SUBMIT:", err);
-    
+
       if (err.message) {
         toast.error(err.message);
       } else {
         toast.error(JSON.stringify(err));
       }
     }
-     finally {
+    finally {
       console.log("🔥 Tournament cargado:", tournament);
       console.log("🔥 tournament.id =", tournament?.id);
 
@@ -157,6 +169,16 @@ const TorneoDetalle = () => {
       transition={{ duration: 0.6 }}
     >
       <h1 className="text-3xl font-bold mb-6">Torneo: {slug}</h1>
+
+
+      {user?.role === "teacher" && tournament && (
+        <button
+          onClick={() => navigate(`/admin/validator?t=${tournament.name}`)}
+          className="mb-6 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+        >
+          Subir validador
+        </button>
+      )}
 
       {/* Subida de código */}
       <div className="mb-8 border border-black rounded-xl p-6 bg-[#E5E0D3] shadow-lg">

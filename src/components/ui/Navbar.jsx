@@ -32,7 +32,7 @@ const Navbar = () => {
   return (
     <nav className="w-full bg-[#F7F2E5] py-6 font-space relative">
       <div className="w-full px-10 flex items-center justify-between">
-        
+
         {/* Logo */}
         <div className="flex-shrink-0">
           <Link to="/">
@@ -65,11 +65,10 @@ const Navbar = () => {
                 onClick={() => setShowMenu((prev) => !prev)}
               />
               <div
-                className={`absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-md z-50 transition-all duration-200 ease-in-out transform ${
-                  showMenu
+                className={`absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-md z-50 transition-all duration-200 ease-in-out transform ${showMenu
                     ? "opacity-100 translate-y-0 pointer-events-auto"
                     : "opacity-0 -translate-y-2 pointer-events-none"
-                }`}
+                  }`}
               >
                 <button
                   className="w-full text-left px-4 py-2 hover:bg-gray-100"
@@ -81,7 +80,6 @@ const Navbar = () => {
                   Ver perfil
                 </button>
 
-                {/* ⭐ SOLO PROFESORES ⭐ */}
                 {user.role === "teacher" && (
                   <button
                     className="w-full text-left px-4 py-2 hover:bg-gray-100"
@@ -90,9 +88,10 @@ const Navbar = () => {
                       setShowMenu(false);
                     }}
                   >
-                    Panel profesor
+                    Subir validador
                   </button>
                 )}
+
 
                 <button
                   className="w-full text-left px-4 py-2 hover:bg-gray-100"
