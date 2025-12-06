@@ -1,23 +1,49 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { api } from '../services/api';
 import { toast } from 'react-toastify';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const navigate = useNavigate();
   const [user, setUser] = useState(() => {
     // Al iniciar, cargamos usuario+token (+role) desde localStorage
     const raw = localStorage.getItem('auth');
     return raw ? JSON.parse(raw) : null; // { username, token, role }
   });
 
-  // Guardar en state + localStorage
-  function saveAuth(next) {
-    setUser(next);
-    if (next) localStorage.setItem('auth', JSON.stringify(next));
-    else localStorage.removeItem('auth');
-  }
+    // Guardar en state + localStorage
+    function saveAuth(next) {
+      setUser(next);
+      if (next) localStorage.setItem('auth', JSON.stringify(next));
+      else localStorage.removeItem('auth');
+    }
+
+  useEffect(() => {
+    if (!user?.token) return;
+
+    // Llamamos al backend para verificar si el token es válido
+    api.me(user.token)
+      .then((data) => {
+        // Token válido → refrescamos usuario y rol por si hubiera cambios
+        saveAuth({
+          username: data.username,
+          token: user.token,
+          role: data.role
+        });
+      })
+      .catch(() => {
+        // Token inválido → cerrar sesión automática sin molestar al usuario
+        saveAuth(null);
+        toast.info('Tu sesión ha expirado. Vuelve a iniciar sesión.');
+      });
+  }, []);
+
+
+
 
   // Registro
   async function register(username, password) {
@@ -27,10 +53,8 @@ export function AuthProvider({ children }) {
 
   // Login real (pide token al backend)
   async function login(username, password) {
-    // ⬅️ CAMBIO 1: ahora esperamos también el role del backend
     const { access_token, role } = await api.login(username, password);
 
-    // ⬅️ CAMBIO 2: guardamos role además de username y token
     saveAuth({ username, token: access_token, role });
 
     toast.success('Sesión iniciada ✅');
@@ -41,12 +65,14 @@ export function AuthProvider({ children }) {
   function logout() {
     saveAuth(null);
     toast.info('Sesión cerrada');
+    navigate('/login');  
   }
+  
 
   const value = {
-    user,                         // { username, token, role }
+    user,                        
     token: user?.token || null,
-    role: user?.role || null,     // ⬅️ CAMBIO 3: exponemos el role por comodidad
+    role: user?.role || null,    
     login,
     logout,
     register,

@@ -53,6 +53,14 @@ export async function getUserSubmissions(username) {
 
 
 export const api = {
+
+  enroll: (slug, token) =>
+    request(`/tournaments/${slug}/enroll`, {
+      method: "POST",
+      body: {},
+      token
+    }),
+
   // AUTH
   register: (username, password) =>
     request('/users/', { method: 'POST', body: { username, password } }),

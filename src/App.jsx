@@ -1,5 +1,5 @@
-// src/App.jsx 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// src/App.jsx
+import { Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/ui/Navbar.jsx";
 import Home from "./pages/Home";
@@ -21,100 +21,93 @@ import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
-    <Router>
-      <div className="bg-[#F7F2E5] min-h-screen font-space">
-        <Navbar />
+    <div className="bg-[#F7F2E5] min-h-screen font-space">
+      <Navbar />
 
-        <Routes>
+      <Routes>
 
-          {/* ============================
-              RUTAS PÚBLICAS
-              ============================ */}
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
+        {/* ============================
+            RUTAS PÚBLICAS
+           ============================ */}
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
 
-          {/* ============================
-              RUTAS SOLO PARA NO LOGGEADOS
-              ============================ */}
-          <Route
-            path="/signup"
-            element={
-              <PublicOnlyRoute>
-                <Signup />
-              </PublicOnlyRoute>
-            }
-          />
+        {/* ============================
+            RUTAS SOLO PARA NO LOGGEADOS
+           ============================ */}
+        <Route
+          path="/signup"
+          element={
+            <PublicOnlyRoute>
+              <Signup />
+            </PublicOnlyRoute>
+          }
+        />
 
-          <Route
-            path="/login"
-            element={
-              <PublicOnlyRoute>
-                <Login />
-              </PublicOnlyRoute>
-            }
-          />
+        <Route
+          path="/login"
+          element={
+            <PublicOnlyRoute>
+              <Login />
+            </PublicOnlyRoute>
+          }
+        />
 
-          {/* ============================
-              RUTAS PRIVADAS (ALUMNOS + PROFES)
-              ============================ */}
+        {/* ============================
+            RUTAS PRIVADAS (ALUMNOS + PROFES)
+           ============================ */}
+        <Route
+          path="/torneos"
+          element={
+            <PrivateRoute>
+              <Torneos />
+            </PrivateRoute>
+          }
+        />
 
-          {/* Lista de torneos */}
-          <Route
-            path="/torneos"
-            element={
-              <PrivateRoute>
-                <Torneos />
-              </PrivateRoute>
-            }
-          />
+        <Route
+          path="/torneos/:slug"
+          element={
+            <PrivateRoute>
+              <TorneoDetalle />
+            </PrivateRoute>
+          }
+        />
 
-          {/* Detalle de torneo */}
-          <Route
-            path="/torneos/:slug"
-            element={
-              <PrivateRoute>
-                <TorneoDetalle />
-              </PrivateRoute>
-            }
-          />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
 
-          {/* Dashboard */}
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
+        <Route
+          path="/perfil"
+          element={
+            <PrivateRoute>
+              <Perfil />
+            </PrivateRoute>
+          }
+        />
 
-          {/* Perfil */}
-          <Route
-            path="/perfil"
-            element={
-              <PrivateRoute>
-                <Perfil />
-              </PrivateRoute>
-            }
-          />
+        {/* ============================
+            RUTA SOLO PROFESOR
+           ============================ */}
+        <Route
+          path="/admin/validator"
+          element={
+            <TeacherRoute>
+              <AdminValidator />
+            </TeacherRoute>
+          }
+        />
 
-          {/* ============================
-              RUTA SOLO PROFESOR
-              ============================ */}
-          <Route
-            path="/admin/validator"
-            element={
-              <TeacherRoute>
-                <AdminValidator />
-              </TeacherRoute>
-            }
-          />
+      </Routes>
 
-        </Routes>
-
-        <ToastContainer position="top-right" autoClose={2500} />
-      </div>
-    </Router>
+      <ToastContainer position="top-right" autoClose={2500} />
+    </div>
   );
 }
 

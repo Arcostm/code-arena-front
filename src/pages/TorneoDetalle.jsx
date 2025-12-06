@@ -7,19 +7,15 @@ import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import ProgressBar from "../components/ProgressBar.jsx";
 
-
-
 const POLL_MS = 1500;
 
 const TorneoDetalle = () => {
-  const { slug } = useParams(); 
+  const { slug } = useParams();
   const { user } = useAuth();
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
-
-
-  // estado del torneo real con ID
   const [tournament, setTournament] = useState(null);
+  const [isEnrolled, setIsEnrolled] = useState(false);
 
   const [ranking, setRanking] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,18 +24,23 @@ const TorneoDetalle = () => {
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // async submit state
   const [submissionId, setSubmissionId] = useState(null);
   const [progress, setProgress] = useState(null);
+
   const pollRef = useRef(null);
 
-  // 1) Cargar torneo REAL (para obtener su ID)
+  // 1) Cargar torneo REAL + saber si está inscrito
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/tournaments/${slug}`)
       .then((r) => r.json())
-      .then(setTournament)
+      .then((data) => {
+        setTournament(data);
+        if (data?.participants?.includes(user?.username)) {
+          setIsEnrolled(true);
+        }
+      })
       .catch(() => toast.error("No se pudo cargar el torneo."));
-  }, [slug]);
+  }, [slug, user?.username]);
 
   // 2) Cargar ranking
   useEffect(() => {
@@ -65,7 +66,23 @@ const TorneoDetalle = () => {
     };
   }, [slug]);
 
-  // Polling
+  // ===========================================================
+  // INSCRIPCIÓN
+  // ===========================================================
+  const handleEnroll = async () => {
+    try {
+      await api.enroll(slug, user.token);
+
+      toast.success("Inscrito correctamente 🎉");
+      setIsEnrolled(true);
+    } catch (e) {
+      toast.error(e.message || "No se pudo inscribir");
+    }
+  };
+
+  // ===========================================================
+  // POLLING DE SUBMISSIONS
+  // ===========================================================
   const startPolling = (id) => {
     if (pollRef.current) clearInterval(pollRef.current);
 
@@ -100,16 +117,10 @@ const TorneoDetalle = () => {
     }, POLL_MS);
   };
 
-  // Enviar código
+  // ===========================================================
+  // SUBIDA DE CÓDIGO
+  // ===========================================================
   const handleSubmit = async () => {
-    if (!user) {
-      toast.error("Debes iniciar sesión para enviar código.");
-      return;
-    }
-    if (!tournament) {
-      toast.error("Torneo no cargado.");
-      return;
-    }
     if (!code.trim()) {
       toast.error("El código no puede estar vacío.");
       return;
@@ -118,19 +129,8 @@ const TorneoDetalle = () => {
     setSubmitting(true);
 
     try {
-      console.log("📤 Enviando al backend:", {
-        tournament_id: tournament?.id,
-        code: code,
-        codeType: typeof code,
-        codeLength: code?.length
-      });
-      
-      
       const resp = await api.submitCodeAsync(
-        {
-          tournament_id: tournament.id,
-          code,
-        },
+        { tournament_id: tournament.id, code },
         user.token
       );
 
@@ -141,23 +141,16 @@ const TorneoDetalle = () => {
 
       toast.info("Código enviado. Procesando en JupyterHub…");
     } catch (err) {
-      console.error("❌ ERROR EN SUBMIT:", err);
-
-      if (err.message) {
-        toast.error(err.message);
-      } else {
-        toast.error(JSON.stringify(err));
-      }
-    }
-    finally {
-      console.log("🔥 Tournament cargado:", tournament);
-      console.log("🔥 tournament.id =", tournament?.id);
-
+      toast.error(err.message || "Error al enviar el código");
+    } finally {
       setSubmitting(false);
     }
   };
 
-  // Render
+  // ===========================================================
+  // RENDER
+  // ===========================================================
+
   if (loading) return <p className="text-center mt-10">Cargando ranking...</p>;
   if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
 
@@ -170,7 +163,7 @@ const TorneoDetalle = () => {
     >
       <h1 className="text-3xl font-bold mb-6">Torneo: {slug}</h1>
 
-
+      {/* Botón para profesores */}
       {user?.role === "teacher" && tournament && (
         <button
           onClick={() => navigate(`/admin/validator?t=${tournament.name}`)}
@@ -180,77 +173,99 @@ const TorneoDetalle = () => {
         </button>
       )}
 
-      {/* Subida de código */}
+      {/* ==============================
+          PARTICIPACIÓN
+         ============================== */}
       <div className="mb-8 border border-black rounded-xl p-6 bg-[#E5E0D3] shadow-lg">
-        <h2 className="text-md font-semibold mb-4">Sube tu intento</h2>
+        <h2 className="text-md font-semibold mb-4">Participación</h2>
 
-        <textarea
-          className="w-full h-40 p-4 rounded-md border border-black bg-white focus:outline-none focus:ring-2 focus:ring-black"
-          placeholder="# Escribe tu código Python aquí..."
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-        />
+        {!isEnrolled ? (
+          <>
+            <p className="text-gray-700 mb-4">
+              Debes inscribirte para poder participar en este torneo.
+            </p>
+            <button
+              onClick={handleEnroll}
+              className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
+            >
+              Inscribirme
+            </button>
+          </>
+        ) : (
+          <>
+            <textarea
+              className="w-full h-40 p-4 rounded-md border border-black bg-white focus:outline-none focus:ring-2 focus:ring-black"
+              placeholder="# Escribe tu código Python aquí..."
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+            />
 
-        <div className="mt-4 flex items-center gap-3">
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
-          >
-            {submitting ? "Enviando..." : "Subir código"}
-          </button>
+            <div className="mt-4 flex items-center gap-3">
+              <button
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
+              >
+                {submitting ? "Enviando..." : "Subir código"}
+              </button>
 
-          {submissionId && (
-            <span className="text-sm text-gray-700">
-              ID de envío: <b>{submissionId}</b>
-            </span>
-          )}
-        </div>
-
-        {/* Progreso */}
-        {progress && (
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm">
-                Estado: <b>{progress.status}</b>
-              </span>
-              <span className="text-sm">{progress.message}</span>
+              {submissionId && (
+                <span className="text-sm text-gray-700">
+                  ID de envío: <b>{submissionId}</b>
+                </span>
+              )}
             </div>
-
-            <ProgressBar value={progress.progress ?? 0} />
-
-            {progress.result && (
-              <div className="mt-4 text-sm grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-3 border border-black rounded-md bg-white">
-                  <h3 className="font-semibold mb-1">Score</h3>
-                  <p className="text-2xl font-bold">{progress.result.score}</p>
-                </div>
-
-                <div className="p-3 border border-black rounded-md bg-white">
-                  <h3 className="font-semibold mb-1">Tiempo</h3>
-                  <p>{progress.result.execution_time}s</p>
-                </div>
-
-                <div className="p-3 border border-black rounded-md bg-white md:col-span-1">
-                  <h3 className="font-semibold mb-1">Validador</h3>
-                  <pre className="text-xs whitespace-pre-wrap">
-                    {progress.result.validator_output}
-                  </pre>
-                </div>
-
-                <div className="p-3 border border-black rounded-md bg-white md:col-span-3">
-                  <h3 className="font-semibold mb-1">Salida del alumno</h3>
-                  <pre className="text-xs whitespace-pre-wrap">
-                    {progress.result.student_output}
-                  </pre>
-                </div>
-              </div>
-            )}
-          </div>
+          </>
         )}
       </div>
 
-      {/* Ranking */}
+      {/* ==============================
+          PROGRESO
+         ============================== */}
+      {progress && (
+        <div className="mb-8 border border-black rounded-xl p-6 bg-[#E5E0D3] shadow-lg">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm">
+              Estado: <b>{progress.status}</b>
+            </span>
+            <span className="text-sm">{progress.message}</span>
+          </div>
+
+          <ProgressBar value={progress.progress ?? 0} />
+
+          {progress.result && (
+            <div className="mt-4 text-sm grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-3 border border-black rounded-md bg-white">
+                <h3 className="font-semibold mb-1">Score</h3>
+                <p className="text-2xl font-bold">{progress.result.score}</p>
+              </div>
+
+              <div className="p-3 border border-black rounded-md bg-white">
+                <h3 className="font-semibold mb-1">Tiempo</h3>
+                <p>{progress.result.execution_time}s</p>
+              </div>
+
+              <div className="p-3 border border-black rounded-md bg-white md:col-span-1">
+                <h3 className="font-semibold mb-1">Validador</h3>
+                <pre className="text-xs whitespace-pre-wrap">
+                  {progress.result.validator_output}
+                </pre>
+              </div>
+
+              <div className="p-3 border border-black rounded-md bg-white md:col-span-3">
+                <h3 className="font-semibold mb-1">Salida del alumno</h3>
+                <pre className="text-xs whitespace-pre-wrap">
+                  {progress.result.student_output}
+                </pre>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ==============================
+          RANKING
+         ============================== */}
       <div className="border border-black rounded-xl p-6 bg-[#E5E0D3] shadow-lg">
         <h2 className="text-md font-semibold mb-4">Ranking</h2>
 
@@ -280,12 +295,12 @@ const TorneoDetalle = () => {
                   <td>{fila.execution_time}s</td>
                 </tr>
               ))
-            )}
+            )}  
+
           </tbody>
         </table>
       </div>
     </motion.div>
   );
 };
-
 export default TorneoDetalle;
