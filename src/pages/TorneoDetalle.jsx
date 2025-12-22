@@ -125,17 +125,22 @@ const TorneoDetalle = () => {
       toast.error("El código no puede estar vacío.");
       return;
     }
-
+  
     setSubmitting(true);
-
+  
     try {
       const resp = await api.submitCodeAsync(
-        { tournament_id: tournament.id, code },
+        { tournament_id: Number(tournament.id), code },
         user.token
       );
-
+  
       setSubmissionId(resp.submission_id);
-      setProgress({ status: "PENDIENTE", progress: 0, message: "En cola..." });
+      setProgress({
+        status: "PENDIENTE",
+        progress: 0,
+        message: "En cola...",
+      });
+  
       startPolling(resp.submission_id);
     } catch (err) {
       toast.error(err.message || "Error al enviar el código");
@@ -143,11 +148,14 @@ const TorneoDetalle = () => {
       setSubmitting(false);
     }
   };
+  
+
 
   // ===========================================================
   // POLLING
   // ===========================================================
   const startPolling = (id) => {
+
     if (pollRef.current) clearInterval(pollRef.current);
 
     pollRef.current = setInterval(async () => {
@@ -158,12 +166,16 @@ const TorneoDetalle = () => {
 
         if (res.status === "COMPLETADO" || res.status === "ERROR") {
           clearInterval(pollRef.current);
+          pollRef.current = null;
         }
-      } catch {
+      } catch (e) {
+        console.error("❌ POLLING ERROR:", e);
         clearInterval(pollRef.current);
+        pollRef.current = null;
       }
     }, POLL_MS);
   };
+
 
   // ===========================================================
   // RENDER
@@ -208,9 +220,9 @@ const TorneoDetalle = () => {
               {/* Monaco */}
               <div className="h-80">
                 <MonacoEditor
-                  key={LANGUAGES[language]?.monaco || "python"}   // 🔥 fuerza remount al cambiar lenguaje
+                  key={LANGUAGES[language]?.monaco || "python"}
                   value={code}
-                  language={LANGUAGES[language]?.monaco || "python"} // ✅ aquí va el lenguaje REAL de monaco
+                  language={LANGUAGES[language]?.monaco || "python"}
                   onChange={(value) => setCode(value ?? "")}
                 />
 
@@ -219,9 +231,66 @@ const TorneoDetalle = () => {
 
 
 
-            <button onClick={handleSubmit} className="mt-4 bg-black text-white px-4 py-2 rounded">
-              Subir código
+            <button
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="mt-4 bg-black text-white px-4 py-2 rounded disabled:opacity-50"
+            >
+              {submitting ? "Enviando..." : "Subir código"}
             </button>
+
+            {progress && (
+              <div className="mt-6 border border-black rounded-xl p-4 bg-[#F7F2E5] shadow-inner">
+                {/* Estado */}
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold">
+                    Estado de la ejecución
+                  </span>
+
+                  <span
+                    className={`text-xs font-bold px-2 py-1 rounded-full ${progress.status === "COMPLETADO"
+                        ? "bg-green-600 text-white"
+                        : progress.status === "ERROR"
+                          ? "bg-red-600 text-white"
+                          : "bg-yellow-500 text-black"
+                      }`}
+                  >
+                    {progress.status}
+                  </span>
+                </div>
+
+                {/* Barra de progreso */}
+                {typeof progress.progress === "number" && (
+                  <div className="w-full h-3 bg-gray-300 rounded overflow-hidden mb-3">
+                    <div
+                      className={`h-full transition-all duration-500 ${progress.status === "COMPLETADO"
+                          ? "bg-green-600"
+                          : progress.status === "ERROR"
+                            ? "bg-red-600"
+                            : "bg-black"
+                        }`}
+                      style={{ width: `${progress.progress}%` }}
+                    />
+                  </div>
+                )}
+
+                {/* Texto de progreso */}
+                {typeof progress.progress === "number" && (
+                  <p className="text-xs mb-1">
+                    Progreso: <b>{progress.progress}%</b>
+                  </p>
+                )}
+
+                {/* Mensaje */}
+                {progress.message && (
+                  <p className="text-sm italic text-gray-700">
+                    {progress.message}
+                  </p>
+                )}
+              </div>
+            )}
+
+
           </>
         )}
       </div>
