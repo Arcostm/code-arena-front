@@ -54,6 +54,16 @@ export async function getUserSubmissions(username) {
 
 export const api = {
 
+  isEnrolled: (slug, token) =>
+    request(`/tournaments/${encodeURIComponent(slug)}/is_enrolled`, { token }),
+
+  unenroll: (slug, token) =>
+    request(`/tournaments/${slug}/unenroll`, {
+      method: "POST",
+      body: {},
+      token
+    }),  
+
   enroll: (slug, token) =>
     request(`/tournaments/${slug}/enroll`, {
       method: "POST",

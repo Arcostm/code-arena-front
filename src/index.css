@@ -13,7 +13,7 @@
 /* Fuente por defecto + sin scroll */
 body {
   font-family: 'Space Grotesk', sans-serif;
-  overflow: hidden;
+  overflow-y: auto;
   margin: 0;
   background-color: #f7f2e5;
 }

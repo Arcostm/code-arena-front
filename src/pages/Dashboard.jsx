@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const username = user?.username;
+
 
   const [tournaments, setTournaments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -63,7 +65,7 @@ const Dashboard = () => {
             </h2>
 
             {tournaments
-              .filter(t => t.participants?.includes(user.username))
+              .filter(t => username && t.participants?.includes(username))
               .map((t, i) => (
                 <Card
                   key={t.id}
@@ -88,7 +90,7 @@ const Dashboard = () => {
             </h2>
 
             {tournaments
-              .filter(t => !t.participants?.includes(user.username))
+              .filter(t => username && !t.participants?.includes(username))
               .map((t, i) => (
                 <Card
                   key={t.id}
