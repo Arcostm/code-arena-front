@@ -12,10 +12,9 @@ import TorneoDetalle from "./pages/TorneoDetalle";
 import Perfil from "./pages/Perfil";
 import AdminValidator from "./pages/AdminValidator";
 import TeacherRoute from "./components/ui/TeacherRoute.jsx";
-
 import PrivateRoute from "./components/ui/PrivateRoute.jsx";
 import PublicOnlyRoute from "./components/ui/PublicOnlyRoute.jsx";
-
+import AdminUsers from "./pages/AdminUsers";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -43,6 +42,16 @@ function App() {
             </PublicOnlyRoute>
           }
         />
+        
+        <Route
+          path="/admin/users"
+          element={
+            <TeacherRoute>
+              <AdminUsers />
+            </TeacherRoute>
+          }
+        />
+
 
         <Route
           path="/login"

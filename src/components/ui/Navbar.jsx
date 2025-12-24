@@ -15,7 +15,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-    toast.success("Sesión cerrada correctamente 🛡️");
+    toast.success("Sesión cerrada correctamente");
     navigate("/");
   };
 
@@ -66,10 +66,22 @@ const Navbar = () => {
               />
               <div
                 className={`absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-md z-50 transition-all duration-200 ease-in-out transform ${showMenu
-                    ? "opacity-100 translate-y-0 pointer-events-auto"
-                    : "opacity-0 -translate-y-2 pointer-events-none"
+                  ? "opacity-100 translate-y-0 pointer-events-auto"
+                  : "opacity-0 -translate-y-2 pointer-events-none"
                   }`}
               >
+                {/* Dashboard */}
+                <button
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                  onClick={() => {
+                    navigate("/dashboard");
+                    setShowMenu(false);
+                  }}
+                >
+                  Dashboard
+                </button>
+
+                {/* Perfil */}
                 <button
                   className="w-full text-left px-4 py-2 hover:bg-gray-100"
                   onClick={() => {
@@ -80,19 +92,34 @@ const Navbar = () => {
                   Ver perfil
                 </button>
 
+                {/* Profesor */}
                 {user.role === "teacher" && (
-                  <button
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                    onClick={() => {
-                      navigate("/admin/validator");
-                      setShowMenu(false);
-                    }}
-                  >
-                    Subir validador
-                  </button>
+                  <>
+                    <button
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                      onClick={() => {
+                        navigate("/admin/validator");
+                        setShowMenu(false);
+                      }}
+                    >
+                      Administrar torneos
+                    </button>
+
+                    <button
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                      onClick={() => {
+                        navigate("/admin/users");
+                        setShowMenu(false);
+                      }}
+                    >
+                      Administrar usuarios
+                    </button>
+                  </>
                 )}
 
 
+
+                {/* Logout */}
                 <button
                   className="w-full text-left px-4 py-2 hover:bg-gray-100"
                   onClick={handleLogout}
@@ -100,6 +127,7 @@ const Navbar = () => {
                   Cerrar sesión
                 </button>
               </div>
+
             </div>
           ) : (
             <div className="flex gap-3">

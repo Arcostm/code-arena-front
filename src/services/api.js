@@ -54,6 +54,24 @@ export async function getUserSubmissions(username) {
 
 export const api = {
 
+  createTournament: (name, token) =>
+    request(
+      "/tournaments/",
+      {
+        method: "POST",
+        body: { name },
+        token,
+      }
+    ),
+
+
+  closeTournament: (id, token) =>
+    request(`/tournaments/${id}/close`, { method: "POST", token }),
+
+  openTournament: (id, token) =>
+    request(`/tournaments/${id}/open`, { method: "POST", token }),
+
+
   isEnrolled: (slug, token) =>
     request(`/tournaments/${encodeURIComponent(slug)}/is_enrolled`, { token }),
 
@@ -62,7 +80,7 @@ export const api = {
       method: "POST",
       body: {},
       token
-    }),  
+    }),
 
   enroll: (slug, token) =>
     request(`/tournaments/${slug}/enroll`, {
@@ -114,6 +132,62 @@ export const api = {
   submitCodeAsync: ({ tournament_id, code }, token) =>
     request('/submit_code_async', { method: 'POST', body: { tournament_id, code }, token }),
 
-  // progreso
   progress: (submissionId) => request(`/progress/${submissionId}`),
+
+  downloadMyLatestCode: (tournamentId, token) =>
+    fetch(`${BASE_URL}/tournaments/${tournamentId}/my-latest-code/download`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then(async (res) => {
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "No se pudo descargar el código");
+      }
+      return res.blob();
+    }),
+
+  deleteTournament: (tournamentId, token) =>
+    request(`/tournaments/${tournamentId}`, {
+      method: "DELETE",
+      token,
+    }),
+
+  archiveTournament: (id, token) =>
+    request(`/tournaments/${id}/archive`, {
+      method: "POST",
+      token,
+    }),
+
+  unarchiveTournament: (id, token) =>
+    request(`/tournaments/${id}/unarchive`, {
+      method: "POST",
+      token,
+    }),
+
+  adminListTournaments: (token) =>
+    request('/admin/tournaments', { token }),
+
+  
+adminListUsers: (token) =>
+  request("/admin/users", { token }),
+
+makeTeacher: (username, token) =>
+  request(`/users/${encodeURIComponent(username)}/make_teacher`, {
+    method: "POST",
+    token,
+  }),
+
+makeStudent: (username, token) =>
+  request(`/users/${encodeURIComponent(username)}/make_student`, {
+    method: "POST",
+    token,
+  }),
+
+deleteUser: (userId, token) =>
+  request(`/users/${userId}`, {
+    method: "DELETE",
+    token,
+  }),
+  
 };

@@ -1,3 +1,5 @@
+// D:\cade-arena-front\frontend\src\pages\Perfil.jsx
+
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";

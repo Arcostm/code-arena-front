@@ -1,3 +1,4 @@
+// D:\cade-arena-front\frontend\src\pages\Signup.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';

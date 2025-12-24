@@ -1,13 +1,14 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import { useRef } from "react";
 import { api } from '../services/api';
 import { toast } from 'react-toastify';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const hasShownExpiryToast = useRef(false);
   const navigate = useNavigate();
   const [user, setUser] = useState(() => {
     // Al iniciar, cargamos usuario+token (+role) desde localStorage
@@ -22,25 +23,26 @@ export function AuthProvider({ children }) {
       else localStorage.removeItem('auth');
     }
 
-  useEffect(() => {
-    if (!user?.token) return;
-
-    // Llamamos al backend para verificar si el token es válido
-    api.me(user.token)
-      .then((data) => {
-        // Token válido → refrescamos usuario y rol por si hubiera cambios
-        saveAuth({
-          username: data.username,
-          token: user.token,
-          role: data.role
+    useEffect(() => {
+      if (!user?.token) return;
+    
+      api.me(user.token)
+        .then((data) => {
+          saveAuth({
+            username: data.username,
+            token: user.token,
+            role: data.role,
+          });
+        })
+        .catch(() => {
+          saveAuth(null);
+    
+          if (!hasShownExpiryToast.current) {
+            toast.info('Tu sesión ha expirado. Vuelve a iniciar sesión.');
+            hasShownExpiryToast.current = true;
+          }
         });
-      })
-      .catch(() => {
-        // Token inválido → cerrar sesión automática sin molestar al usuario
-        saveAuth(null);
-        toast.info('Tu sesión ha expirado. Vuelve a iniciar sesión.');
-      });
-  }, []);
+    }, [user?.token]);          
 
 
 
@@ -64,7 +66,6 @@ export function AuthProvider({ children }) {
   // Logout
   function logout() {
     saveAuth(null);
-    toast.info('Sesión cerrada');
     navigate('/login');  
   }
   
