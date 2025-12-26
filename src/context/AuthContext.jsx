@@ -48,10 +48,19 @@ export function AuthProvider({ children }) {
 
 
   // Registro
-  async function register(username, password) {
-    await api.register(username, password);
-    toast.success('Usuario creado. ¡Inicia sesión!');
+  async function register(username, email, password) {
+    const { access_token, role } = await api.signup(username, email, password);
+  
+    saveAuth({
+      username,
+      token: access_token,
+      role,
+    });
+  
+    toast.success('Cuenta creada y sesión iniciada ✅');
   }
+  
+  
 
   // Login real (pide token al backend)
   async function login(username, password) {

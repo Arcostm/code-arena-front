@@ -90,8 +90,11 @@ export const api = {
     }),
 
   // AUTH
-  register: (username, password) =>
-    request('/users/', { method: 'POST', body: { username, password } }),
+  register: (username, email, password) =>
+    request('/users/', {
+      method: 'POST',
+      body: { username, email, password },
+    }),
 
   login: (username, password) =>
     request('/login', { method: 'POST', body: { username, password } }),
@@ -168,26 +171,41 @@ export const api = {
   adminListTournaments: (token) =>
     request('/admin/tournaments', { token }),
 
-  
-adminListUsers: (token) =>
-  request("/admin/users", { token }),
 
-makeTeacher: (username, token) =>
-  request(`/users/${encodeURIComponent(username)}/make_teacher`, {
-    method: "POST",
-    token,
-  }),
+  adminListUsers: (token) =>
+    request("/admin/users", { token }),
 
-makeStudent: (username, token) =>
-  request(`/users/${encodeURIComponent(username)}/make_student`, {
-    method: "POST",
-    token,
-  }),
+  makeTeacher: (username, token) =>
+    request(`/users/${encodeURIComponent(username)}/make_teacher`, {
+      method: "POST",
+      token,
+    }),
 
-deleteUser: (userId, token) =>
-  request(`/users/${userId}`, {
-    method: "DELETE",
-    token,
-  }),
-  
+  makeStudent: (username, token) =>
+    request(`/users/${encodeURIComponent(username)}/make_student`, {
+      method: "POST",
+      token,
+    }),
+
+  deleteUser: (userId, token) =>
+    request(`/users/${userId}`, {
+      method: "DELETE",
+      token,
+    }),
+
+  createUser: (data, token) =>
+    request("/users/", {
+      method: "POST",
+      body: data,
+      token,
+    }),
+
+  signup: (username, email, password) =>
+    request('/auth/signup', {
+      method: 'POST',
+      body: { username, email, password },
+    }),
+
+
+
 };

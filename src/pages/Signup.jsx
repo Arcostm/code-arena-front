@@ -11,9 +11,11 @@ const Signup = () => {
   const { register } = useAuth();
   const [form, setForm] = useState({
     username: '',
+    email: '',
     password: '',
     termsAccepted: false,
   });
+
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -30,17 +32,24 @@ const Signup = () => {
       toast.error('Debes aceptar los términos.');
       return;
     }
-    if (!form.username.trim() || !form.password.trim()) {
+    if (!form.username.trim() || !form.email.trim() || !form.password.trim()) {
       toast.error('Usuario y contraseña son obligatorios.');
       return;
     }
 
     try {
-      await register(form.username.trim(), form.password.trim());
-      navigate('/login');
+      await register(
+        form.username.trim(),
+        form.email.trim(),
+        form.password.trim()
+      );
+    
+      navigate('/dashboard');
+    
     } catch (err) {
       toast.error(err.message || 'Error al registrar');
     }
+    
   };
 
   return (
@@ -89,6 +98,18 @@ const Signup = () => {
           required
           variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
         />
+
+        <motion.input
+          type="email"
+          name="email"
+          placeholder="Correo electrónico"
+          className="px-4 py-2 rounded border shadow-md focus:outline-none focus:ring-2 focus:ring-black"
+          value={form.email}
+          onChange={handleChange}
+          required
+          variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+        />
+
 
         {/* Password */}
         <motion.input
