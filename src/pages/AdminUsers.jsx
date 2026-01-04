@@ -11,6 +11,7 @@ const AdminUsers = () => {
     const [loading, setLoading] = useState(false);
     const [newUsername, setNewUsername] = useState("");
     const [newPassword, setNewPassword] = useState("");
+    const [newEmail, setNewEmail] = useState("");
     const [newRole, setNewRole] = useState("student");
     const [creating, setCreating] = useState(false);
 
@@ -28,26 +29,33 @@ const AdminUsers = () => {
     }, []);
 
     const createUser = async () => {
-        if (!newUsername.trim() || !newPassword.trim()) {
-            toast.error("Usuario y contraseña obligatorios");
+        if (
+            !newUsername.trim() ||
+            !newEmail.trim() ||
+            !newPassword.trim()
+          ) {
+          
+            toast.error("Usuario, email y contraseña obligatorios");
+
             return;
         }
 
         setCreating(true);
         try {
             await api.createUser(
-                {
-                    username: newUsername.trim(),
-                    password: newPassword.trim(),
-                    role: newRole,
-                },
+                newUsername.trim(),
+                newEmail.trim(),
+                newPassword.trim(),
+                newRole,
                 user.token
-            );
+              );
+              
 
             toast.success("Usuario creado correctamente");
             setNewUsername("");
             setNewPassword("");
             setNewRole("student");
+            setNewEmail("");
             loadUsers();
         } catch (e) {
             toast.error(e.message || "Error creando usuario");
@@ -145,6 +153,15 @@ const AdminUsers = () => {
                     onChange={(e) => setNewPassword(e.target.value)}
                 />
 
+                <input
+                    type="email"
+                    className="w-full p-2 border border-black rounded mb-3"
+                    placeholder="Email"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                />
+
+
                 <select
                     className="w-full p-2 border border-black rounded mb-4"
                     value={newRole}
@@ -153,6 +170,8 @@ const AdminUsers = () => {
                     <option value="student">Alumno</option>
                     <option value="teacher">Profesor</option>
                 </select>
+
+
 
                 <button
                     onClick={createUser}

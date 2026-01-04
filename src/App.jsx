@@ -17,6 +17,8 @@ import PublicOnlyRoute from "./components/ui/PublicOnlyRoute.jsx";
 import AdminUsers from "./pages/AdminUsers";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
   return (
@@ -30,6 +32,8 @@ function App() {
            ============================ */}
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* ============================
             RUTAS SOLO PARA NO LOGGEADOS
@@ -42,7 +46,7 @@ function App() {
             </PublicOnlyRoute>
           }
         />
-        
+
         <Route
           path="/admin/users"
           element={

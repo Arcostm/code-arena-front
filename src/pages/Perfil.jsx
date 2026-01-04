@@ -1,94 +1,170 @@
-// D:\cade-arena-front\frontend\src\pages\Perfil.jsx
-
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
-import avatar from "../assets/avatar.png";
+import { api } from "../services/api";
+import avatarFallback from "../assets/avatar.png";
 
 const Perfil = () => {
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [history, setHistory] = useState([]);
+  const { user, token, logout, setUser } = useAuth();
 
-  const handleLogout = () => {
-    logout();
-    toast.success("Sesión cerrada con éxito 👋");
-
-    setTimeout(() => {
-      navigate("/");
-    }, 100);
-  };
+  const [email, setEmail] = useState(user?.email || "");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState(
+    user?.avatar_url || avatarFallback
+  );
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/users/${user.username}/history`
-        );
-        if (!res.ok) throw new Error("Error al obtener historial");
-        const data = await res.json();
-        setHistory(data.history || []);
-      } catch (err) {
-        toast.error("No se pudo cargar el historial");
-      }
-    };
-
-    if (user) fetchHistory();
+    if (user?.avatar_url) setAvatarPreview(user.avatar_url);
   }, [user]);
 
+  function handleAvatarChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("El archivo debe ser una imagen");
+      return;
+    }
+
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  }
+
+  async function handleSave() {
+    if (password && password !== confirm) {
+      toast.error("Las contraseñas no coinciden");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      let newAvatarUrl = user?.avatar_url;
+
+      if (avatarFile) {
+        const res = await api.uploadAvatar(avatarFile, token);
+        newAvatarUrl = res.avatar_url;
+      }
+
+      const updated = await api.updateProfile(
+        {
+          email,
+          new_password: password || undefined,
+        },
+        token
+      );
+
+      // 🔥 Actualizar sesión en caliente
+      setUser({
+        ...user,
+        email: updated.email,
+        avatar_url: newAvatarUrl,
+      });
+
+      toast.success("Perfil actualizado correctamente");
+    } catch (err) {
+      toast.error(err.message || "Error actualizando perfil");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+
+  function handleLogout() {
+    logout();
+    toast.success("Sesión cerrada 👋");
+    navigate("/");
+  }
+
   return (
-    <div className="min-h-screen bg-[#F7F2E5] font-space flex flex-col items-center p-10 text-black">
-      <h1 className="text-4xl font-bold mb-8">Mi Arena</h1>
+    <div className="min-h-screen bg-[#F7F2E5] flex justify-center items-start p-10">
+      <div className="bg-white rounded-xl shadow-md w-full max-w-xl p-8">
+        <h1 className="text-3xl font-bold mb-6 text-center">Mi Perfil</h1>
 
-      <img
-        src={avatar}
-        alt="Avatar"
-        className="w-32 h-32 rounded-full border border-black object-cover mb-4"
-      />
+        <div className="flex flex-col items-center mb-6">
+          <div className="w-32 h-32 rounded-full overflow-hidden border bg-gray-100 mb-2">
+            <img
+              src={avatarPreview}
+              onError={(e) => (e.currentTarget.src = avatarFallback)}
+              alt="Avatar"
+              className="w-full h-full object-cover"
+            />
+          </div>
 
-      <h2 className="text-xl font-bold">{user?.username || "Gladiador"}</h2>
-      <p className="underline text-sm mb-6">
-        {user?.email || "usuario@codearena.dev"}
-      </p>
+          <label className="text-sm underline cursor-pointer">
+            Cambiar foto
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleAvatarChange}
+            />
+          </label>
+        </div>
 
-      <div className="w-full max-w-2xl">
-        <h3 className="text-lg font-bold mb-4">Historial de envíos</h3>
-        {history.length === 0 ? (
-          <p className="text-gray-600">No tienes envíos todavía.</p>
-        ) : (
-          <table className="w-full text-sm border border-black rounded-md overflow-hidden">
-            <thead className="bg-[#E5E0D3]">
-              <tr>
-                <th className="px-4 py-2 text-left">Torneo</th>
-                <th className="px-4 py-2">Puntuación</th>
-                <th className="px-4 py-2">Tiempo</th>
-                <th className="px-4 py-2">Fecha</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.map((h, i) => (
-                <tr key={i} className="border-t">
-                  <td className="px-4 py-2">{h.tournament}</td>
-                  <td className="px-4 py-2 text-center">{h.score}</td>
-                  <td className="px-4 py-2 text-center">{h.execution_time}s</td>
-                  <td className="px-4 py-2 text-center">
-                    {new Date(h.timestamp * 1000).toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
 
-      <div className="flex gap-4 mt-8">
-        <button
-          onClick={handleLogout}
-          className="border border-black px-6 py-2 rounded-md hover:bg-black hover:text-white transition-colors"
-        >
-          Cerrar sesión
-        </button>
+
+
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm font-semibold">Usuario</label>
+            <input
+              value={user?.username}
+              disabled
+              className="w-full px-4 py-2 border rounded-md bg-gray-100"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold">Email</label>
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold">Nueva contraseña</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold">Confirmar contraseña</label>
+            <input
+              type="password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md"
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-4 mt-8">
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="flex-1 bg-black text-white py-2 rounded-md hover:bg-gray-800 disabled:opacity-50"
+          >
+            Guardar cambios
+          </button>
+
+          <button
+            onClick={handleLogout}
+            className="border border-black px-4 py-2 rounded-md hover:bg-black hover:text-white"
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </div>
     </div>
   );

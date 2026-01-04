@@ -16,57 +16,64 @@ export function AuthProvider({ children }) {
     return raw ? JSON.parse(raw) : null; // { username, token, role }
   });
 
-    // Guardar en state + localStorage
-    function saveAuth(next) {
-      setUser(next);
-      if (next) localStorage.setItem('auth', JSON.stringify(next));
-      else localStorage.removeItem('auth');
-    }
+  // Guardar en state + localStorage
+  function saveAuth(next) {
+    setUser(next);
+    if (next) localStorage.setItem('auth', JSON.stringify(next));
+    else localStorage.removeItem('auth');
+  }
 
-    useEffect(() => {
-      if (!user?.token) return;
-    
-      api.me(user.token)
-        .then((data) => {
-          saveAuth({
-            username: data.username,
-            token: user.token,
-            role: data.role,
-          });
-        })
-        .catch(() => {
-          saveAuth(null);
-    
-          if (!hasShownExpiryToast.current) {
-            toast.info('Tu sesión ha expirado. Vuelve a iniciar sesión.');
-            hasShownExpiryToast.current = true;
-          }
+  useEffect(() => {
+    if (!user?.token) return;
+
+    api.me(user.token)
+      .then((data) => {
+        saveAuth({
+          username: data.username,
+          email: data.email,
+          avatar_url: data.avatar_url,
+          token: user.token,
+          role: data.role,
         });
-    }, [user?.token]);          
 
+      })
+      .catch(() => {
+        saveAuth(null);
 
-
+        if (!hasShownExpiryToast.current) {
+          toast.info('Tu sesión ha expirado. Vuelve a iniciar sesión.');
+          hasShownExpiryToast.current = true;
+        }
+      });
+  }, [user?.token]);
 
   // Registro
   async function register(username, email, password) {
     const { access_token, role } = await api.signup(username, email, password);
-  
+
     saveAuth({
       username,
       token: access_token,
       role,
     });
-  
+
     toast.success('Cuenta creada y sesión iniciada ✅');
   }
-  
-  
+
+
 
   // Login real (pide token al backend)
   async function login(username, password) {
     const { access_token, role } = await api.login(username, password);
 
-    saveAuth({ username, token: access_token, role });
+    saveAuth({
+      username,
+      email: null,
+      avatar_url: null,
+      token: access_token,
+      role,
+    });
+
 
     toast.success('Sesión iniciada ✅');
     return true;
@@ -75,18 +82,20 @@ export function AuthProvider({ children }) {
   // Logout
   function logout() {
     saveAuth(null);
-    navigate('/login');  
+    navigate('/login');
   }
-  
+
 
   const value = {
-    user,                        
+    user,
     token: user?.token || null,
-    role: user?.role || null,    
+    role: user?.role || null,
     login,
     logout,
     register,
+    setUser: saveAuth,
   };
+
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -2,12 +2,12 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { getRanking, api } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import ProgressBar from "../components/ProgressBar.jsx";
 import { MonacoEditor } from "../components/editor";
 import { LANGUAGES } from "../constants/languages";
+import { api } from "../services/api";
 
 
 
@@ -45,7 +45,7 @@ const TorneoDetalle = () => {
   // ===========================================================
   const loadRanking = async () => {
     try {
-      const data = await getRanking(slug);
+      const data = await api.ranking(slug);
       if (data?.ranking) {
         setRanking(data.ranking);
       }
@@ -59,9 +59,7 @@ const TorneoDetalle = () => {
 
     (async () => {
       try {
-        const t = await fetch(
-          `${import.meta.env.VITE_API_URL}/tournaments/${slug}`
-        ).then((r) => r.json());
+        const t = await api.getTournament(slug);
 
         if (!mounted) return;
         setTournament(t);
@@ -109,7 +107,7 @@ const TorneoDetalle = () => {
   // ===========================================================
   const handleEnroll = async () => {
     try {
-      await api.enroll(tournament.name, user.token);
+      await api.enroll(slug, user.token);
       toast.success("Inscrito correctamente 🎉");
       navigate("/dashboard", { replace: true });
     } catch (e) {
@@ -122,7 +120,7 @@ const TorneoDetalle = () => {
     if (!ok) return;
 
     try {
-      await api.unenroll(tournament.name, user.token);
+      await api.unenroll(slug, user.token);
       toast.success("Te has desinscrito 👋");
       navigate("/dashboard", { replace: true });
     } catch (e) {

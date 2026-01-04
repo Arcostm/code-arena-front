@@ -1,15 +1,17 @@
+// D:\cade-arena-front\frontend\src\pages\Torneos.jsx
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { getTournaments } from "../services/api";
+import { api } from "../services/api";
 
 const Torneos = () => {
   const [torneos, setTorneos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+ 
+ 
   useEffect(() => {
-    getTournaments()
+    api.listTournaments()
       .then((data) => {
         setTorneos(data);
         setLoading(false);
@@ -20,6 +22,7 @@ const Torneos = () => {
         setLoading(false);
       });
   }, []);
+  
 
   if (loading) return <p className="text-center mt-10">Cargando torneos...</p>;
   if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;

@@ -21,7 +21,6 @@ const Login = () => {
 
     try {
       await login(username.trim(), password.trim());
-      navigate('/dashboard');
     } catch (err) {
       toast.error(err.message || 'Error al iniciar sesión');
     }
@@ -88,17 +87,24 @@ const Login = () => {
           </motion.button>
         </motion.form>
 
-        <motion.p
-          className="mt-6 text-sm"
+        <motion.div
+          className="mt-6 text-sm text-center space-y-2"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
         >
-          ¿No tienes cuenta?{' '}
-          <Link to="/signup" className="underline">
-            Regístrate
+          <Link to="/forgot-password" className="underline block">
+            ¿Olvidaste tu contraseña?
           </Link>
-        </motion.p>
+
+          <p>
+            ¿No tienes cuenta?{' '}
+            <Link to="/signup" className="underline">
+              Regístrate
+            </Link>
+          </p>
+        </motion.div>
+
       </motion.div>
     </motion.div>
   );

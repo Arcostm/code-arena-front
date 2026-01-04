@@ -1,14 +1,9 @@
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import ilustracion from '../assets/columna-c.png';
+import ilustracion from "../assets/columna-c.png";
 
 const Home = () => {
-
-
-
-
   return (
-    <div className="relative w-full h-screen bg-[#F7F2E5] overflow-hidden">
+    <div className="relative w-full min-h-screen pt-24 bg-[#F7F2E5] overflow-hidden">
       {/* Contenido principal */}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
@@ -25,10 +20,9 @@ const Home = () => {
           <p>Escala en el ranking.</p>
           <p>Deja huella en cada línea.</p>
         </div>
-
       </motion.div>
 
-      {/* Imagen de fondo perfectamente centrada */}
+      {/* Ilustración inferior */}
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}

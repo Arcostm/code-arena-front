@@ -2,7 +2,6 @@
 
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
-import avatar from "../../assets/avatar.png";
 import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
@@ -58,12 +57,28 @@ const Navbar = () => {
         <div className="flex-shrink-0 relative" ref={menuRef}>
           {user ? (
             <div className="relative">
-              <img
-                src={avatar}
-                alt="Avatar"
-                className="w-12 h-12 rounded-full border border-black object-cover cursor-pointer"
+              <div
+                className="w-12 h-12 rounded-full overflow-hidden border border-black cursor-pointer bg-white"
                 onClick={() => setShowMenu((prev) => !prev)}
-              />
+              >
+                {user.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/src/assets/avatar.png";
+                    }}
+                  />
+                ) : (
+                  <img
+                    src="/src/assets/avatar.png"
+                    alt="Avatar por defecto"
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+
               <div
                 className={`absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-md z-50 transition-all duration-200 ease-in-out transform ${showMenu
                   ? "opacity-100 translate-y-0 pointer-events-auto"

@@ -1,9 +1,9 @@
 // D:\cade-arena-front\frontend\src\pages\AdminValidator.jsx
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { api, getTournaments } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
+import { api } from "../services/api";
 
 const AdminValidator = () => {
   const { user } = useAuth();
